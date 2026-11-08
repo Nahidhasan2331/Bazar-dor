@@ -1,6 +1,7 @@
-import { MongoClient, type Db } from "mongodb";
 import dns from "node:dns";
+import { MongoClient, type Db } from "mongodb";
 
+// Configure DNS for MongoDB Atlas SRV lookup
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const uri = process.env.MONGODB_URI;
@@ -14,7 +15,11 @@ const globalForMongo = globalThis as typeof globalThis & {
   _mongoClient?: MongoClient;
 };
 
-export const client = globalForMongo._mongoClient ?? new MongoClient(uri);
+export const client =
+  globalForMongo._mongoClient ??
+  new MongoClient(uri, {
+    serverSelectionTimeoutMS: 10000,
+  });
 
 if (process.env.NODE_ENV !== "production") {
   globalForMongo._mongoClient = client;
